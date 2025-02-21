@@ -3,6 +3,7 @@ import torch.nn as nn
 from modules.util import MyResNet34
 import numpy as np
 
+DEVICE=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class audio2poseLSTM(nn.Module):
     def __init__(self):
         super(audio2poseLSTM,self).__init__()
@@ -35,7 +36,7 @@ def get_pose_from_audio(img,audio,model_path):
     maxv = np.array([0.411, 0.547, 0.433, 159.1, 116.5, 376.5], dtype=np.float32)
 
 
-    generator = audio2poseLSTM().cuda()
+    generator = audio2poseLSTM().to(DEVICE)
 
     ckpt_para = torch.load(model_path)
 
@@ -46,7 +47,7 @@ def get_pose_from_audio(img,audio,model_path):
     for i in range(num_frame):
         audio_seq.append(audio[i*4:i*4+4])
 
-    audio = torch.from_numpy(np.array(audio_seq,dtype=np.float32)).unsqueeze(0).cuda()
+    audio = torch.from_numpy(np.array(audio_seq,dtype=np.float32)).unsqueeze(0).to(DEVICE)
 
     x = {}
     x["img"] = img

@@ -14,6 +14,8 @@ from modules.keypoint_detector import KPDetector
 from modules.audio2kp import AudioModel3D
 import yaml,os,imageio
 
+DEVICE=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 def draw_annotation_box( image, rotation_vector, translation_vector, color=(255, 255, 255), line_width=2):
     """Draw a 3D box as annotation of pose"""
 
@@ -130,7 +132,7 @@ def audio2head(audio_path, img_path, model_path, save_path):
 
     img = np.array(img_as_float32(img))
     img = img.transpose((2, 0, 1))
-    img = torch.from_numpy(img).unsqueeze(0).cuda()
+    img = torch.from_numpy(img).unsqueeze(0).to(DEVICE)
 
 
     ref_pose_rot, ref_pose_trans = get_pose_from_audio(img, audio_feature, model_path)
@@ -143,11 +145,11 @@ def audio2head(audio_path, img_path, model_path, save_path):
                              **config['model_params']['common_params'])
     generator = OcclusionAwareGenerator(**config['model_params']['generator_params'],
                                         **config['model_params']['common_params'])
-    kp_detector = kp_detector.cuda()
-    generator = generator.cuda()
+    kp_detector = kp_detector.to(DEVICE)
+    generator = generator.to(DEVICE)
 
     opt = argparse.Namespace(**yaml.load(open("./config/parameters.yaml")))
-    audio2kp = AudioModel3D(opt).cuda()
+    audio2kp = AudioModel3D(opt).to(DEVICE)
 
     checkpoint  = torch.load(model_path)
     kp_detector.load_state_dict(checkpoint["kp_detector"])
@@ -190,8 +192,8 @@ def audio2head(audio_path, img_path, model_path, save_path):
     for bs_idx in range(bs):
         t = {}
 
-        t["audio"] = audio_f[:, bs_idx].cuda()
-        t["pose"] = poses[:, bs_idx].cuda()
+        t["audio"] = audio_f[:, bs_idx].to(DEVICE)
+        t["pose"] = poses[:, bs_idx].to(DEVICE)
         t["id_img"] = img
         kp_gen_source = kp_detector(img)
 
