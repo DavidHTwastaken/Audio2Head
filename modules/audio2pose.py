@@ -38,7 +38,7 @@ def get_pose_from_audio(img,audio,model_path):
 
     generator = audio2poseLSTM().to(DEVICE)
 
-    ckpt_para = torch.load(model_path)
+    ckpt_para = torch.load(model_path, map_location=DEVICE)
 
     generator.load_state_dict(ckpt_para["audio2pose"])
     generator.eval()

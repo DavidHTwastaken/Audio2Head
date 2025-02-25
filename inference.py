@@ -140,7 +140,7 @@ def audio2head(audio_path, img_path, model_path, save_path):
 
     config_file = r"./config/vox-256.yaml"
     with open(config_file) as f:
-        config = yaml.load(f)
+        config = yaml.load(f, Loader=yaml.Loader)
     kp_detector = KPDetector(**config['model_params']['kp_detector_params'],
                              **config['model_params']['common_params'])
     generator = OcclusionAwareGenerator(**config['model_params']['generator_params'],
@@ -148,10 +148,10 @@ def audio2head(audio_path, img_path, model_path, save_path):
     kp_detector = kp_detector.to(DEVICE)
     generator = generator.to(DEVICE)
 
-    opt = argparse.Namespace(**yaml.load(open("./config/parameters.yaml")))
+    opt = argparse.Namespace(**yaml.load(open("./config/parameters.yaml"), Loader=yaml.Loader))
     audio2kp = AudioModel3D(opt).to(DEVICE)
 
-    checkpoint  = torch.load(model_path)
+    checkpoint  = torch.load(model_path, map_location=DEVICE)
     kp_detector.load_state_dict(checkpoint["kp_detector"])
     generator.load_state_dict(checkpoint["generator"])
     audio2kp.load_state_dict(checkpoint["audio2kp"])

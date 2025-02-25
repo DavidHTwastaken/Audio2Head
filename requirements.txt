@@ -5,5 +5,4 @@ pyyaml
 pytorch-lightning
 imageio
 scipy
-pyworld
 opencv-python
