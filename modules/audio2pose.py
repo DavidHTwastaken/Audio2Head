@@ -32,6 +32,7 @@ class audio2poseLSTM(nn.Module):
 
 def get_pose_from_audio(img,audio,model_path):
     num_frame = len(audio) // 4
+    # Defining minv and maxv for normalization
     minv = np.array([-0.639, -0.501, -0.47, -102.6, -32.5, 184.6], dtype=np.float32)
     maxv = np.array([0.411, 0.547, 0.433, 159.1, 116.5, 376.5], dtype=np.float32)
 
@@ -57,6 +58,8 @@ def get_pose_from_audio(img,audio,model_path):
     print(poses.shape)
     poses = poses.cpu().data.numpy()[0]
 
+    # Normalizing the output manually; this would normally occur in AntiAliasInterpolation2d in util.py,
+    # since audio2kp.py imports the class
     poses = (poses+1)/2*(maxv-minv)+minv
     rot,trans =  poses[:,:3].copy(),poses[:,3:].copy()
     return rot,trans
